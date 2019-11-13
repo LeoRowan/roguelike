@@ -1,0 +1,8 @@
+[package]
+name = "roguelike"
+version = "0.1.0"
+authors = ["Jak Rowan <jak@rowan.li>"]
+edition = "2018"
+
+[dependencies]
+tcod = "0.15.0"

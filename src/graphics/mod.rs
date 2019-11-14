@@ -16,7 +16,7 @@ pub struct Tcod {
     pub root: Root,
 }
 
-pub fn render_all(game: &mut Game, entities: &[Entity]) {
+pub fn render_all(game: &mut Game, entities: &Vec<Entity>) {
     for entity in entities {
         entity.draw(&mut game.tcod.con);
     }

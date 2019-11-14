@@ -14,6 +14,10 @@ pub const COLOR_DARK_GROUND: Color = Color {
     b: 150,
 };
 
+const ROOM_MAX_SIZE: usize = 10;
+const ROOM_MIN_SIZE: usize = 6;
+const MAX_ROOMS: usize = 30;
+
 pub use geometry::{Point, Rect};
 pub use map::Map;
 pub use tile::Tile;

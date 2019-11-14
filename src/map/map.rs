@@ -1,19 +1,48 @@
-use super::{Point, Rect, Tile, MAP_HEIGHT, MAP_WIDTH};
+use super::{
+    super::entity::Entity, Point, Rect, Tile, MAP_HEIGHT, MAP_WIDTH, MAX_ROOMS, ROOM_MAX_SIZE,
+    ROOM_MIN_SIZE,
+};
+use rand::{thread_rng, Rng};
 
 pub struct Map(Vec<Tile>);
 
 impl Map {
-    pub fn new() -> Self {
+    pub fn new(player: &mut Entity) -> Self {
         let mut map = Map(vec![Tile::wall(); MAP_HEIGHT * MAP_WIDTH]);
-        map.set_tile(Point::new(30, 22), Tile::wall());
-        map.set_tile(Point::new(50, 22), Tile::wall());
+        let mut rooms = vec![];
 
-        let room1 = Rect::new(Point::new(20, 15), 10, 15);
-        let room2 = Rect::new(Point::new(50, 15), 10, 15);
-        map.make_room(room1);
-        map.make_room(room2);
-        map.make_h_corridor(Point::new(25, 23), 55);
+        for _ in 0..MAX_ROOMS {
+            let w = thread_rng().gen_range(ROOM_MIN_SIZE, ROOM_MAX_SIZE + 1);
+            let h = thread_rng().gen_range(ROOM_MIN_SIZE, ROOM_MAX_SIZE + 1);
+            let x = thread_rng().gen_range(0, MAP_WIDTH - w) as i32;
+            let y = thread_rng().gen_range(0, MAP_HEIGHT - h) as i32;
 
+            let room = Rect::new(Point { x, y }, w as i32, h as i32);
+            let failed = rooms.iter().any(|other| room.intersects_with(other));
+
+            if !failed {
+                map.make_room(room);
+
+                let center = room.center();
+                if rooms.is_empty() {
+                    // This is the first room, where the player starts
+                    player.set_transform(center);
+                } else {
+                    // For all other rooms, connect to previous with corridor
+                    let prev_center = rooms[rooms.len() - 1].center();
+
+                    if rand::random() {
+                        map.make_h_corridor(center, prev_center.x);
+                        map.make_v_corridor(prev_center, center.y);
+                    } else {
+                        map.make_v_corridor(center, prev_center.y);
+                        map.make_h_corridor(prev_center, center.x);
+                    }
+                }
+
+                rooms.push(room);
+            }
+        }
         map
     }
 

@@ -5,10 +5,10 @@ pub fn handle_keys(game: &mut Game, player: &mut Entity) -> bool {
     let key = game.tcod.root.wait_for_keypress(true);
     match key {
         // Handle Movement
-        Key { code: Up, .. } => player.move_by(Point::up(), &game.state),
-        Key { code: Down, .. } => player.move_by(Point::down(), &game.state),
-        Key { code: Left, .. } => player.move_by(Point::left(), &game.state),
-        Key { code: Right, .. } => player.move_by(Point::right(), &game.state),
+        Key { code: Up, .. } => player.translate(Point::up(), &game.state),
+        Key { code: Down, .. } => player.translate(Point::down(), &game.state),
+        Key { code: Left, .. } => player.translate(Point::left(), &game.state),
+        Key { code: Right, .. } => player.translate(Point::right(), &game.state),
 
         // Handle Fulscreen
         Key {

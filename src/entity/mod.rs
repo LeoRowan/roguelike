@@ -22,8 +22,12 @@ impl Entity {
         }
     }
 
+    pub fn set_transform(&mut self, transform: Point) {
+        self.transform = transform;
+    }
+
     /// Move the entity by the given amount
-    pub fn move_by(&mut self, dest: Point, state: &GameState) {
+    pub fn translate(&mut self, dest: Point, state: &GameState) {
         let new_transform = self.transform + dest;
 
         if !state.map.out_of_bounds(new_transform) && !state.map.is_blocked_tile(new_transform) {

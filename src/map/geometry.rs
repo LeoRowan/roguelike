@@ -1,4 +1,4 @@
-use std::ops::Add;
+use std::ops::{Add, Div};
 
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Point {
@@ -30,8 +30,17 @@ impl Point {
 
 impl Add<Point> for Point {
     type Output = Point;
+
     fn add(self, rhs: Point) -> Self::Output {
         Point::new(self.x + rhs.x, self.y + rhs.y)
+    }
+}
+
+impl Div<i32> for Point {
+    type Output = Point;
+
+    fn div(self, rhs: i32) -> Self::Output {
+        Point::new(self.x / rhs, self.y / rhs)
     }
 }
 
@@ -50,5 +59,16 @@ impl Rect {
                 y: p1.y + h,
             },
         }
+    }
+
+    pub fn center(&self) -> Point {
+        (self.p1 + self.p2) / 2
+    }
+
+    pub fn intersects_with(&self, other: &Rect) -> bool {
+        self.p1.x <= other.p2.x
+            && self.p2.x >= other.p1.x
+            && self.p1.y <= other.p2.y
+            && self.p2.y >= other.p1.y
     }
 }

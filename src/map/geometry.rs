@@ -34,3 +34,21 @@ impl Add<Point> for Point {
         Point::new(self.x + rhs.x, self.y + rhs.y)
     }
 }
+
+#[derive(Clone, Copy, Debug, Default)]
+pub struct Rect {
+    pub p1: Point,
+    pub p2: Point,
+}
+
+impl Rect {
+    pub fn new(p1: Point, w: i32, h: i32) -> Self {
+        Rect {
+            p1,
+            p2: Point {
+                x: p1.x + w,
+                y: p1.y + h,
+            },
+        }
+    }
+}

@@ -14,6 +14,6 @@ pub const COLOR_DARK_GROUND: Color = Color {
     b: 150,
 };
 
-pub use geometry::Point;
+pub use geometry::{Point, Rect};
 pub use map::Map;
 pub use tile::Tile;

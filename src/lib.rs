@@ -38,8 +38,8 @@ impl Game {
         let half_width = SCREEN_WIDTH as i32 / 2;
         let half_height = SCREEN_HEIGHT as i32 / 2;
 
-        let player = Entity::new(Point::new(half_width, half_height), '@', colors::WHITE);
-        let npc = Entity::new(Point::new(half_width - 5, half_height), '@', colors::YELLOW);
+        let player = Entity::new(Point::new(25, 23), '@', colors::WHITE);
+        let npc = Entity::new(Point::new(55, 23), '@', colors::YELLOW);
         let mut entities = [player, npc];
 
         while !self.tcod.root.window_closed() {

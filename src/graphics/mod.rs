@@ -21,18 +21,18 @@ pub struct Tcod {
 }
 
 pub fn render_all(game: &mut Game, entities: &Vec<Entity>, fov_recompute: bool) {
-    for entity in entities {
-        let Point { x, y } = entity.get_transform();
-        if game.tcod.fov.is_in_fov(x, y) {
-            entity.draw(&mut game.tcod.con);
-        };
-    }
-
     if fov_recompute {
         let Point { x, y } = entities[0].get_transform();
         game.tcod
             .fov
             .compute_fov(x, y, TORCH_RADIUS as i32, FOV_LIGTH_WALLS, FOV_ALGO);
+    }
+
+    for entity in entities {
+        let Point { x, y } = entity.get_transform();
+        if game.tcod.fov.is_in_fov(x, y) {
+            entity.draw(&mut game.tcod.con);
+        };
     }
 
     for y in 0..MAP_HEIGHT as i32 {
@@ -46,9 +46,15 @@ pub fn render_all(game: &mut Game, entities: &Vec<Entity>, fov_recompute: bool) 
                 (true, false) => COLOR_LIGHT_GROUND,
             };
 
-            game.tcod
-                .con
-                .set_char_background(x, y, color, BackgroundFlag::Set);
+            if visible {
+                game.state.map.set_explored_tile(Point { x, y });
+            }
+
+            if game.state.map.is_explored_tile(Point { x, y }) {
+                game.tcod
+                    .con
+                    .set_char_background(x, y, color, BackgroundFlag::Set);
+            }
         }
     }
 

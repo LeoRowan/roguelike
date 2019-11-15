@@ -54,9 +54,19 @@ impl Map {
         &self.0[self.tile_idx(x, y)]
     }
 
+    fn tile_at_mut(&mut self, x: i32, y: i32) -> &mut Tile {
+        let idx = self.tile_idx(x, y);
+        &mut self.0[idx]
+    }
+
     pub fn set_tile(&mut self, Point { x, y }: Point, tile: Tile) {
         let idx = self.tile_idx(x, y);
         self.0[idx] = tile;
+    }
+
+    pub fn set_explored_tile(&mut self, Point { x, y }: Point) {
+        let tile = self.tile_at_mut(x, y);
+        tile.explored = true;
     }
 
     pub fn is_blocked_tile(&self, Point { x, y }: Point) -> bool {
@@ -65,6 +75,10 @@ impl Map {
 
     pub fn is_blocked_sight_tile(&self, Point { x, y }: Point) -> bool {
         self.tile_at(x, y).block_sight
+    }
+
+    pub fn is_explored_tile(&self, Point { x, y }: Point) -> bool {
+        self.tile_at(x, y).explored
     }
 
     pub fn out_of_bounds(&self, Point { x, y }: Point) -> bool {

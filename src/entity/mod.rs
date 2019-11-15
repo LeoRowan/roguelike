@@ -22,6 +22,10 @@ impl Entity {
         }
     }
 
+    pub fn get_transform(&self) -> Point {
+        self.transform
+    }
+
     pub fn set_transform(&mut self, transform: Point) {
         self.transform = transform;
     }

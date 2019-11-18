@@ -39,7 +39,7 @@ impl Game {
                     x,
                     y,
                     !state.map.is_blocked_sight_tile(Point { x, y }),
-                    !state.map.is_blocked_tile(Point { x, y }),
+                    !state.map.is_blocked_tile(Point { x, y }, &state.entities),
                 );
             }
         }
@@ -47,17 +47,18 @@ impl Game {
         Game { tcod, state }
     }
 
-    pub fn start(mut self, mut entities: Vec<Entity>) {
+    pub fn start(mut self) {
         let mut previous_player_transform = Point::new(-1, -1);
         while !self.tcod.root.window_closed() {
             self.tcod.con.clear();
 
-            let fov_recompute = previous_player_transform != entities[PLAYER].get_transform();
-            graphics::render_all(&mut self, &entities, fov_recompute);
+            let fov_recompute =
+                previous_player_transform != self.state.entities[PLAYER].get_transform();
+            graphics::render_all(&mut self, fov_recompute);
             self.tcod.root.flush();
 
-            previous_player_transform = entities[PLAYER].get_transform();
-            let exit = input::handle_keys(&mut self, &mut entities[PLAYER]);
+            previous_player_transform = self.state.entities[PLAYER].get_transform();
+            let exit = input::handle_keys(&mut self);
             if exit {
                 break;
             }

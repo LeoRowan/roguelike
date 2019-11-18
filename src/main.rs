@@ -6,11 +6,13 @@ use roguelike::{
 use tcod::colors;
 
 fn main() {
-    let player = Entity::new(Point::default(), '@', colors::WHITE);
+    let mut player = Entity::new(Point::default(), '@', colors::WHITE, "player", true);
+    player.set_alive(true);
+
     let mut entities = vec![player];
     let map = Map::new(&mut entities);
 
-    let state = GameState { map };
+    let state = GameState { map, entities };
 
-    Game::new(state).start(entities);
+    Game::new(state).start();
 }

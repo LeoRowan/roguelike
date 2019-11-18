@@ -32,7 +32,7 @@ impl Map {
                 } else {
                     // For all other rooms, place entities and connect to
                     // previous with corridor
-                    Map::place_entities(&room, entities);
+                    map.place_entities(&room, entities);
                     let prev_center = rooms[rooms.len() - 1].center();
 
                     if rand::random() {
@@ -73,8 +73,11 @@ impl Map {
         tile.explored = true;
     }
 
-    pub fn is_blocked_tile(&self, Point { x, y }: Point) -> bool {
-        self.tile_at(x, y).blocked
+    pub fn is_blocked_tile(&self, point: Point, entities: &Vec<Entity>) -> bool {
+        self.tile_at(point.x, point.y).blocked
+            || entities
+                .iter()
+                .any(|x| x.blocks() && x.get_transform() == point)
     }
 
     pub fn is_blocked_sight_tile(&self, Point { x, y }: Point) -> bool {
@@ -97,7 +100,7 @@ impl Map {
         }
     }
 
-    fn place_entities(room: &Rect, entities: &mut Vec<Entity>) {
+    fn place_entities(&self, room: &Rect, entities: &mut Vec<Entity>) {
         let num_monsters = rand::thread_rng().gen_range(0, MAX_ROOM_MONSTERS + 1);
 
         for _ in 0..num_monsters {
@@ -106,13 +109,16 @@ impl Map {
                 y: rand::thread_rng().gen_range(room.p1.y + 1, room.p2.y),
             };
 
-            let monster = if rand::random::<f32>() < 0.8 {
-                Entity::new(transform, 'o', colors::DESATURATED_GREEN)
-            } else {
-                Entity::new(transform, 'T', colors::DARKER_GREEN)
-            };
+            if !self.is_blocked_tile(transform, entities) {
+                let mut monster = if rand::random::<f32>() < 0.8 {
+                    Entity::new(transform, 'o', colors::DESATURATED_GREEN, "orc", true)
+                } else {
+                    Entity::new(transform, 'T', colors::DARKER_GREEN, "troll", true)
+                };
+                monster.set_alive(true);
 
-            entities.push(monster);
+                entities.push(monster);
+            }
         }
     }
 

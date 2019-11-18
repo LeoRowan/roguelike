@@ -11,14 +11,20 @@ pub struct Entity {
     transform: Point,
     char: char,
     color: Color,
+    name: String,
+    blocks: bool,
+    alive: bool,
 }
 
 impl Entity {
-    pub fn new(transform: Point, char: char, color: Color) -> Self {
+    pub fn new(transform: Point, char: char, color: Color, name: &str, blocks: bool) -> Self {
         Entity {
             transform,
             char,
             color,
+            name: name.into(),
+            blocks,
+            alive: false,
         }
     }
 
@@ -30,12 +36,26 @@ impl Entity {
         self.transform = transform;
     }
 
-    /// Move the entity by the given amount
-    pub fn translate(&mut self, dest: Point, state: &GameState) {
-        let new_transform = self.transform + dest;
+    pub fn blocks(&self) -> bool {
+        self.blocks
+    }
 
-        if !state.map.out_of_bounds(new_transform) && !state.map.is_blocked_tile(new_transform) {
-            self.transform = new_transform;
+    pub fn set_alive(&mut self, alive: bool) {
+        self.alive = alive;
+    }
+
+    pub fn is_alive(&self) -> bool {
+        self.alive
+    }
+
+    /// Move the entity by the given amount
+    pub fn translate(id: usize, dest: Point, state: &mut GameState) {
+        let new_transform = state.entities[id].transform + dest;
+
+        if !state.map.out_of_bounds(new_transform)
+            && !state.map.is_blocked_tile(new_transform, &state.entities)
+        {
+            state.entities[id].set_transform(new_transform);
         }
     }
 

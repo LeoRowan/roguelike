@@ -1,12 +1,4 @@
-use super::{
-    entity::Entity,
-    map::Point,
-    map::{
-        COLOR_DARK_GROUND, COLOR_DARK_WALL, COLOR_LIGHT_GROUND, COLOR_LIGHT_WALL, FOV_ALGO,
-        FOV_LIGTH_WALLS, MAP_HEIGHT, MAP_WIDTH, TORCH_RADIUS,
-    },
-    Game,
-};
+use super::{constants::*, entity::Entity, map::Point, Game};
 use tcod::{console::*, map::Map as FovMap};
 
 pub const SCREEN_WIDTH: usize = 80;
@@ -22,7 +14,7 @@ pub struct Tcod {
 
 pub fn render_all(game: &mut Game, entities: &Vec<Entity>, fov_recompute: bool) {
     if fov_recompute {
-        let Point { x, y } = entities[0].get_transform();
+        let Point { x, y } = entities[PLAYER].get_transform();
         game.tcod
             .fov
             .compute_fov(x, y, TORCH_RADIUS as i32, FOV_LIGTH_WALLS, FOV_ALGO);

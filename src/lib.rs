@@ -1,13 +1,15 @@
 use tcod::{self, console::*, map::Map as FovMap};
+pub mod constants;
 pub mod entity;
 pub mod graphics;
 pub mod input;
 pub mod map;
 pub mod state;
 
+use constants::*;
 pub use entity::Entity;
 use graphics::{Tcod, LIMIT_FPS, SCREEN_HEIGHT, SCREEN_WIDTH};
-use map::{Point, MAP_HEIGHT, MAP_WIDTH};
+use map::Point;
 pub use state::GameState;
 
 pub struct Game {
@@ -50,12 +52,12 @@ impl Game {
         while !self.tcod.root.window_closed() {
             self.tcod.con.clear();
 
-            let fov_recompute = previous_player_transform != entities[0].get_transform();
+            let fov_recompute = previous_player_transform != entities[PLAYER].get_transform();
             graphics::render_all(&mut self, &entities, fov_recompute);
             self.tcod.root.flush();
 
-            previous_player_transform = entities[0].get_transform();
-            let exit = input::handle_keys(&mut self, &mut entities[0]);
+            previous_player_transform = entities[PLAYER].get_transform();
+            let exit = input::handle_keys(&mut self, &mut entities[PLAYER]);
             if exit {
                 break;
             }

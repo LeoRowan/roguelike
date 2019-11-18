@@ -1,13 +1,14 @@
 use super::{
-    super::entity::Entity, Point, Rect, Tile, MAP_HEIGHT, MAP_WIDTH, MAX_ROOMS, ROOM_MAX_SIZE,
-    ROOM_MIN_SIZE,
+    super::{constants::*, entity::Entity},
+    Point, Rect, Tile,
 };
 use rand::{thread_rng, Rng};
+use tcod::colors;
 
 pub struct Map(Vec<Tile>);
 
 impl Map {
-    pub fn new(player: &mut Entity) -> Self {
+    pub fn new(entities: &mut Vec<Entity>) -> Self {
         let mut map = Map(vec![Tile::wall(); MAP_HEIGHT * MAP_WIDTH]);
         let mut rooms = vec![];
 
@@ -25,10 +26,13 @@ impl Map {
 
                 let center = room.center();
                 if rooms.is_empty() {
+                    let player = &mut entities[PLAYER];
                     // This is the first room, where the player starts
                     player.set_transform(center);
                 } else {
-                    // For all other rooms, connect to previous with corridor
+                    // For all other rooms, place entities and connect to
+                    // previous with corridor
+                    Map::place_entities(&room, entities);
                     let prev_center = rooms[rooms.len() - 1].center();
 
                     if rand::random() {
@@ -90,6 +94,25 @@ impl Map {
             for y in (room.p1.y + 1)..room.p2.y {
                 self.set_tile(Point { x, y }, Tile::empty());
             }
+        }
+    }
+
+    fn place_entities(room: &Rect, entities: &mut Vec<Entity>) {
+        let num_monsters = rand::thread_rng().gen_range(0, MAX_ROOM_MONSTERS + 1);
+
+        for _ in 0..num_monsters {
+            let transform = Point {
+                x: rand::thread_rng().gen_range(room.p1.x + 1, room.p2.x),
+                y: rand::thread_rng().gen_range(room.p1.y + 1, room.p2.y),
+            };
+
+            let monster = if rand::random::<f32>() < 0.8 {
+                Entity::new(transform, 'o', colors::DESATURATED_GREEN)
+            } else {
+                Entity::new(transform, 'T', colors::DARKER_GREEN)
+            };
+
+            entities.push(monster);
         }
     }
 

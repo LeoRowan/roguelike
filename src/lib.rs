@@ -7,7 +7,7 @@ pub mod map;
 pub mod state;
 
 use constants::*;
-pub use entity::Entity;
+pub use entity::{actions::PlayerAction, Entity};
 use graphics::{Tcod, LIMIT_FPS, SCREEN_HEIGHT, SCREEN_WIDTH};
 use map::Point;
 pub use state::GameState;
@@ -58,9 +58,15 @@ impl Game {
             self.tcod.root.flush();
 
             previous_player_transform = self.state.entities[PLAYER].get_transform();
-            let exit = input::handle_keys(&mut self);
-            if exit {
+            let player_action = input::handle_keys(&mut self);
+            if player_action == PlayerAction::Exit {
                 break;
+            }
+
+            if self.state.entities[PLAYER].is_alive() && player_action == PlayerAction::TookTurn {
+                for entity in self.state.entities.iter().skip(1) {
+                    println!("The {} growls", entity.name())
+                }
             }
         }
     }

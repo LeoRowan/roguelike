@@ -4,6 +4,8 @@ use tcod::{
     console::{BackgroundFlag, Console},
 };
 
+pub mod actions;
+
 /// This is a generic entity: the player, a monster, an item, the stairs...
 /// It's always represented by a character on screen
 #[derive(Debug)]
@@ -46,6 +48,10 @@ impl Entity {
 
     pub fn is_alive(&self) -> bool {
         self.alive
+    }
+
+    pub fn name(&self) -> &str {
+        &self.name
     }
 
     /// Move the entity by the given amount

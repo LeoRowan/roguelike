@@ -1,10 +1,12 @@
 use tcod::{self, console::*, map::Map as FovMap};
+pub mod components;
 pub mod constants;
 pub mod entity;
 pub mod graphics;
 pub mod input;
 pub mod map;
 pub mod state;
+pub mod systems;
 
 use constants::*;
 pub use entity::{actions::PlayerAction, Entity};
@@ -52,20 +54,21 @@ impl Game {
         while !self.tcod.root.window_closed() {
             self.tcod.con.clear();
 
-            let fov_recompute =
-                previous_player_transform != self.state.entities[PLAYER].get_transform();
+            let fov_recompute = previous_player_transform != self.state.entities[PLAYER].position;
             graphics::render_all(&mut self, fov_recompute);
             self.tcod.root.flush();
 
-            previous_player_transform = self.state.entities[PLAYER].get_transform();
+            previous_player_transform = self.state.entities[PLAYER].position;
             let player_action = input::handle_keys(&mut self);
             if player_action == PlayerAction::Exit {
                 break;
             }
 
-            if self.state.entities[PLAYER].is_alive() && player_action == PlayerAction::TookTurn {
-                for entity in self.state.entities.iter().skip(1) {
-                    println!("The {} growls", entity.name())
+            if self.state.entities[PLAYER].is_alive && player_action == PlayerAction::TookTurn {
+                for id in 1..self.state.entities.len() {
+                    if self.state.entities[id].ai.is_some() {
+                        systems::ai_take_turn(id, &mut self);
+                    }
                 }
             }
         }

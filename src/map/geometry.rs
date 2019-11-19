@@ -26,6 +26,12 @@ impl Point {
     pub fn right() -> Self {
         Point::new(1, 0)
     }
+
+    pub fn distance_to(self, other: Point) -> f32 {
+        let dx = other.x - self.x;
+        let dy = other.y - self.y;
+        ((dx.pow(2) + dy.pow(2)) as f32).sqrt()
+    }
 }
 
 impl Add<Point> for Point {

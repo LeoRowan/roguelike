@@ -1,5 +1,5 @@
 use super::{constants::*, map::Point, Game};
-use tcod::{console::*, map::Map as FovMap};
+use tcod::{colors, console::*, map::Map as FovMap};
 
 pub const SCREEN_WIDTH: usize = 80;
 pub const SCREEN_HEIGHT: usize = 50;
@@ -14,14 +14,14 @@ pub struct Tcod {
 
 pub fn render_all(game: &mut Game, fov_recompute: bool) {
     if fov_recompute {
-        let Point { x, y } = game.state.entities[PLAYER].get_transform();
+        let Point { x, y } = game.state.entities[PLAYER].position;
         game.tcod
             .fov
             .compute_fov(x, y, TORCH_RADIUS as i32, FOV_LIGTH_WALLS, FOV_ALGO);
     }
 
     for entity in game.state.entities.iter() {
-        let Point { x, y } = entity.get_transform();
+        let Point { x, y } = entity.position;
         if game.tcod.fov.is_in_fov(x, y) {
             entity.draw(&mut game.tcod.con);
         };
@@ -48,6 +48,17 @@ pub fn render_all(game: &mut Game, fov_recompute: bool) {
                     .set_char_background(x, y, color, BackgroundFlag::Set);
             }
         }
+    }
+
+    game.tcod.root.set_default_foreground(colors::WHITE);
+    if let Some(fighter) = game.state.entities[PLAYER].fighter {
+        game.tcod.root.print_ex(
+            1,
+            (SCREEN_HEIGHT - 2) as i32,
+            BackgroundFlag::None,
+            TextAlignment::Left,
+            format!("HP: {}/{}", fighter.hp, fighter.max_hp),
+        )
     }
 
     blit(

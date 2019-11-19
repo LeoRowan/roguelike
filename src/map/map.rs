@@ -1,5 +1,9 @@
 use super::{
-    super::{constants::*, entity::Entity},
+    super::{
+        components::{Ai, Fighter},
+        constants::*,
+        entity::Entity,
+    },
     Point, Rect, Tile,
 };
 use rand::{thread_rng, Rng};
@@ -28,7 +32,7 @@ impl Map {
                 if rooms.is_empty() {
                     let player = &mut entities[PLAYER];
                     // This is the first room, where the player starts
-                    player.set_transform(center);
+                    player.position = center;
                 } else {
                     // For all other rooms, place entities and connect to
                     // previous with corridor
@@ -75,9 +79,7 @@ impl Map {
 
     pub fn is_blocked_tile(&self, point: Point, entities: &Vec<Entity>) -> bool {
         self.tile_at(point.x, point.y).blocked
-            || entities
-                .iter()
-                .any(|x| x.blocks() && x.get_transform() == point)
+            || entities.iter().any(|x| x.blocks && x.position == point)
     }
 
     pub fn is_blocked_sight_tile(&self, Point { x, y }: Point) -> bool {
@@ -112,10 +114,14 @@ impl Map {
             if !self.is_blocked_tile(transform, entities) {
                 let mut monster = if rand::random::<f32>() < 0.8 {
                     Entity::new(transform, 'o', colors::DESATURATED_GREEN, "orc", true)
+                        .with_ai_component(Ai::Basic)
+                        .with_fighter_component(Fighter::new(10, 10, 0, 3))
                 } else {
                     Entity::new(transform, 'T', colors::DARKER_GREEN, "troll", true)
+                        .with_ai_component(Ai::Basic)
+                        .with_fighter_component(Fighter::new(16, 16, 1, 4))
                 };
-                monster.set_alive(true);
+                monster.is_alive = true;
 
                 entities.push(monster);
             }

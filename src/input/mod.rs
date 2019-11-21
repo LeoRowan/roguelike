@@ -56,7 +56,7 @@ fn player_move_or_attack(direction: Point, state: &mut GameState) {
     let target_id = state
         .entities
         .iter()
-        .position(|x| x.position == new_transform);
+        .position(|entity| entity.fighter.is_some() && entity.position == new_transform);
 
     match target_id {
         Some(target_id) => {

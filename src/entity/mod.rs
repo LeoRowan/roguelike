@@ -39,7 +39,8 @@ impl Entity {
     pub fn move_towards(id: usize, target: Point, state: &mut GameState) {
         let dx = target.x - state.entities[id].position.x;
         let dy = target.y - state.entities[id].position.y;
-        let distance = ((dx.pow(2) + dy.pow(2)) as f32).sqrt();
+
+        let distance = state.entities[id].position.distance_to(target);
 
         let x = (dx as f32 / distance).round() as i32;
         let y = (dy as f32 / distance).round() as i32;
@@ -70,19 +71,23 @@ impl Entity {
         self
     }
 
-    pub fn take_damage(&mut self, damage: u32) {
+    pub fn take_damage(&mut self, damage: i32) {
         if let Some(fighter) = self.fighter.as_mut() {
             fighter.hp -= damage;
+
+            if fighter.hp <= 0 {
+                self.is_alive = false;
+                fighter.on_death.callback(self);
+            }
         }
     }
 
     pub fn attack(&self, other: &mut Entity) {
         let ap = self.fighter.map_or(0, |f| f.power);
         let ad = other.fighter.map_or(0, |f| f.defense);
+        let damage = ap - ad;
 
-        if (ap - ad) > 0 {
-            let damage = ap - ad;
-
+        if damage > 0 {
             println!("{} attacks {} for {} hp", self.name, other.name, damage);
             other.take_damage(damage);
             dbg!(other);

@@ -1,6 +1,6 @@
 use super::{
     super::{
-        components::{Ai, Fighter},
+        components::{Ai, DeathCallback, Fighter},
         constants::*,
         entity::Entity,
     },
@@ -115,11 +115,11 @@ impl Map {
                 let mut monster = if rand::random::<f32>() < 0.8 {
                     Entity::new(transform, 'o', colors::DESATURATED_GREEN, "orc", true)
                         .with_ai_component(Ai::Basic)
-                        .with_fighter_component(Fighter::new(10, 10, 0, 3))
+                        .with_fighter_component(Fighter::new(10, 10, 0, 3, DeathCallback::Monster))
                 } else {
                     Entity::new(transform, 'T', colors::DARKER_GREEN, "troll", true)
                         .with_ai_component(Ai::Basic)
-                        .with_fighter_component(Fighter::new(16, 16, 1, 4))
+                        .with_fighter_component(Fighter::new(16, 16, 1, 4, DeathCallback::Monster))
                 };
                 monster.is_alive = true;
 

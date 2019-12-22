@@ -10,7 +10,7 @@ pub mod systems;
 
 use constants::*;
 pub use entity::{actions::PlayerAction, Entity};
-use graphics::{Tcod, LIMIT_FPS, SCREEN_HEIGHT, SCREEN_WIDTH};
+use graphics::Tcod;
 use map::Point;
 pub use state::GameState;
 
@@ -31,6 +31,7 @@ impl Game {
         let mut tcod = Tcod {
             root,
             con: Offscreen::new(MAP_WIDTH as i32, MAP_HEIGHT as i32),
+            hud: Offscreen::new(MAP_WIDTH as i32, HUD_HEIGHT as i32),
             fov: FovMap::new(MAP_WIDTH as i32, MAP_HEIGHT as i32),
         };
 

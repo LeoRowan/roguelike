@@ -1,7 +1,16 @@
 use tcod::{colors::Color, map::FovAlgorithm};
 
+pub const SCREEN_WIDTH: usize = 80;
+pub const SCREEN_HEIGHT: usize = 50;
+
+pub const LIMIT_FPS: usize = 20;
+
 pub const MAP_WIDTH: usize = 80;
-pub const MAP_HEIGHT: usize = 45;
+pub const MAP_HEIGHT: usize = 43;
+
+pub const HUD_HEIGHT: usize = 7;
+pub const HUD_Y: usize = SCREEN_HEIGHT - HUD_HEIGHT;
+pub const BAR_WIDTH: usize = 20;
 
 pub const COLOR_DARK_WALL: Color = Color { r: 0, g: 0, b: 100 };
 pub const COLOR_LIGHT_WALL: Color = Color {

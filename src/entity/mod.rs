@@ -90,7 +90,6 @@ impl Entity {
         if damage > 0 {
             println!("{} attacks {} for {} hp", self.name, other.name, damage);
             other.take_damage(damage);
-            dbg!(other);
         } else {
             println!("{} attacks {} but has no effect", self.name, other.name);
         }

@@ -1,6 +1,6 @@
-use super::{entity::Entity, map::Map};
+use super::{map::Map, messages::Messages};
 
 pub struct GameState {
     pub map: Map,
-    pub entities: Vec<Entity>,
+    pub messages: Messages,
 }

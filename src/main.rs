@@ -2,6 +2,7 @@
 use roguelike::{
     components::{DeathCallback, Fighter},
     map::{Map, Point},
+    messages::Messages,
     Entity, Game, GameState,
 };
 use tcod::colors;
@@ -14,7 +15,10 @@ fn main() {
     let mut entities = vec![player];
     let map = Map::new(&mut entities);
 
-    let state = GameState { map, entities };
+    let state = GameState {
+        map,
+        messages: Messages::new(),
+    };
 
-    Game::new(state).start();
+    Game::new(state).start(entities);
 }

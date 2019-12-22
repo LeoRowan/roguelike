@@ -1,4 +1,4 @@
-use super::{constants::*, map::Point, Game};
+use super::{constants::*, entity::Entity, map::Point, Game};
 use tcod::{
     colors::{self, Color},
     console::*,
@@ -12,11 +12,11 @@ pub struct Tcod {
     pub fov: FovMap,
 }
 
-pub fn render_all(game: &mut Game, fov_recompute: bool) {
-    recompute_fov(game, fov_recompute);
+pub fn render_all(game: &mut Game, fov_recompute: bool, entities: &Vec<Entity>) {
+    recompute_fov(game, fov_recompute, entities);
     draw_map(game);
-    draw_entities(game);
-    draw_hud(game);
+    draw_entities(game, entities);
+    draw_hud(game, entities);
 
     blit(
         &game.tcod.con,
@@ -29,9 +29,9 @@ pub fn render_all(game: &mut Game, fov_recompute: bool) {
     );
 }
 
-fn recompute_fov(game: &mut Game, fov_recompute: bool) {
+fn recompute_fov(game: &mut Game, fov_recompute: bool, entities: &Vec<Entity>) {
     if fov_recompute {
-        let Point { x, y } = game.state.entities[PLAYER].position;
+        let Point { x, y } = entities[PLAYER].position;
         game.tcod
             .fov
             .compute_fov(x, y, TORCH_RADIUS as i32, FOV_LIGTH_WALLS, FOV_ALGO);
@@ -63,10 +63,8 @@ fn draw_map(game: &mut Game) {
     }
 }
 
-fn draw_entities(game: &mut Game) {
-    let mut to_draw: Vec<_> = game
-        .state
-        .entities
+fn draw_entities(game: &mut Game, entities: &Vec<Entity>) {
+    let mut to_draw: Vec<_> = entities
         .iter()
         .filter(|e| game.tcod.fov.is_in_fov(e.position.x, e.position.y))
         .collect();
@@ -77,23 +75,12 @@ fn draw_entities(game: &mut Game) {
     }
 }
 
-fn draw_hud(game: &mut Game) {
+fn draw_hud(game: &mut Game, entities: &Vec<Entity>) {
     game.tcod.hud.set_default_background(colors::BLACK);
     game.tcod.hud.clear();
 
-    let hp = game.state.entities[PLAYER].fighter.map_or(0, |f| f.hp);
-    let max_hp = game.state.entities[PLAYER].fighter.map_or(0, |f| f.max_hp);
-
-    draw_bar(
-        &mut game.tcod.hud,
-        Point::new(1, 1),
-        BAR_WIDTH as i32,
-        "HP",
-        hp,
-        max_hp,
-        colors::DARK_RED,
-        colors::DARK_GREY,
-    );
+    draw_hp(game, entities);
+    draw_messages(game);
 
     blit(
         &mut game.tcod.hud,
@@ -104,6 +91,42 @@ fn draw_hud(game: &mut Game) {
         1.0,
         1.0,
     );
+
+    fn draw_hp(game: &mut Game, entities: &Vec<Entity>) {
+        let hp = entities[PLAYER].fighter.map_or(0, |f| f.hp);
+        let max_hp = entities[PLAYER].fighter.map_or(0, |f| f.max_hp);
+
+        draw_bar(
+            &mut game.tcod.hud,
+            Point::new(1, 1),
+            BAR_WIDTH as i32,
+            "HP",
+            hp,
+            max_hp,
+            colors::DARK_RED,
+            colors::DARK_GREY,
+        );
+    }
+
+    fn draw_messages(game: &mut Game) {
+        let mut y = MSG_HEIGHT as i32;
+        for &(ref msg, color) in game.state.messages.iter().rev() {
+            let msg_height =
+                game.tcod
+                    .hud
+                    .get_height_rect(MSG_X as i32, y, MSG_WIDTH as i32, 0, msg);
+            y -= msg_height;
+
+            if y < 0 {
+                break;
+            }
+
+            game.tcod.hud.set_default_foreground(color);
+            game.tcod
+                .hud
+                .print_rect(MSG_X as i32, y, MSG_WIDTH as i32, 0, msg);
+        }
+    }
 }
 
 fn draw_bar(

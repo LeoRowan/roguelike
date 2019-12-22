@@ -39,3 +39,7 @@ pub const MAX_ROOMS: usize = 30;
 pub const MAX_ROOM_MONSTERS: usize = 3;
 
 pub const PLAYER: usize = 0;
+
+pub const MSG_X: usize = BAR_WIDTH + 2;
+pub const MSG_WIDTH: usize = SCREEN_WIDTH - BAR_WIDTH - 2;
+pub const MSG_HEIGHT: usize = HUD_HEIGHT - 1;

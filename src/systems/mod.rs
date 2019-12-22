@@ -1,11 +1,11 @@
 use super::{constants::*, entity::Entity, map::Point, Game};
 use std::cmp;
 
-pub fn ai_take_turn(monster_id: usize, game: &mut Game) {
-    let Point { x, y } = game.state.entities[monster_id].position;
+pub fn ai_take_turn(monster_id: usize, game: &mut Game, entities: &mut Vec<Entity>) {
+    let Point { x, y } = entities[monster_id].position;
     let can_attack_player = {
-        let player = &game.state.entities[PLAYER];
-        let monster = &game.state.entities[monster_id];
+        let player = &entities[PLAYER];
+        let monster = &entities[monster_id];
         let distance = monster.position.distance_to(player.position);
 
         distance < 2.0 && player.fighter.map_or(false, |f| f.hp > 0)
@@ -13,12 +13,12 @@ pub fn ai_take_turn(monster_id: usize, game: &mut Game) {
 
     match (game.tcod.fov.is_in_fov(x, y), can_attack_player) {
         (true, false) => {
-            let player_position = game.state.entities[PLAYER].position;
-            Entity::move_towards(monster_id, player_position, &mut game.state);
+            let player_position = entities[PLAYER].position;
+            Entity::move_towards(monster_id, player_position, &mut game.state, entities);
         }
         (true, true) => {
-            let (player, monster) = mut_two(PLAYER, monster_id, &mut game.state.entities);
-            monster.attack(player);
+            let (player, monster) = mut_two(PLAYER, monster_id, entities);
+            monster.attack(player, game);
         }
         _ => (),
     }

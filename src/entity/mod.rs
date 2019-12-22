@@ -2,9 +2,10 @@ use super::{
     components::{Ai, Fighter},
     map::Point,
     state::GameState,
+    Game,
 };
 use tcod::{
-    colors::Color,
+    colors::{self, Color},
     console::{BackgroundFlag, Console},
 };
 
@@ -26,26 +27,31 @@ pub struct Entity {
 
 impl Entity {
     /// Move the entity by the given amount
-    pub fn translate(id: usize, dest: Point, state: &mut GameState) {
-        let new_transform = state.entities[id].position + dest;
+    pub fn translate(id: usize, dest: Point, state: &mut GameState, entities: &mut Vec<Entity>) {
+        let new_transform = entities[id].position + dest;
 
         if !state.map.out_of_bounds(new_transform)
-            && !state.map.is_blocked_tile(new_transform, &state.entities)
+            && !state.map.is_blocked_tile(new_transform, entities)
         {
-            state.entities[id].position = new_transform;
+            entities[id].position = new_transform;
         }
     }
 
-    pub fn move_towards(id: usize, target: Point, state: &mut GameState) {
-        let dx = target.x - state.entities[id].position.x;
-        let dy = target.y - state.entities[id].position.y;
+    pub fn move_towards(
+        id: usize,
+        target: Point,
+        state: &mut GameState,
+        entities: &mut Vec<Entity>,
+    ) {
+        let dx = target.x - entities[id].position.x;
+        let dy = target.y - entities[id].position.y;
 
-        let distance = state.entities[id].position.distance_to(target);
+        let distance = entities[id].position.distance_to(target);
 
         let x = (dx as f32 / distance).round() as i32;
         let y = (dy as f32 / distance).round() as i32;
 
-        Self::translate(id, Point { x, y }, state);
+        Self::translate(id, Point { x, y }, state, entities);
     }
 
     pub fn new(position: Point, char: char, color: Color, name: &str, blocks: bool) -> Self {
@@ -71,27 +77,33 @@ impl Entity {
         self
     }
 
-    pub fn take_damage(&mut self, damage: i32) {
+    pub fn take_damage(&mut self, damage: i32, game: &mut Game) {
         if let Some(fighter) = self.fighter.as_mut() {
             fighter.hp -= damage;
 
             if fighter.hp <= 0 {
                 self.is_alive = false;
-                fighter.on_death.callback(self);
+                fighter.on_death.callback(self, game);
             }
         }
     }
 
-    pub fn attack(&self, other: &mut Entity) {
+    pub fn attack(&self, other: &mut Entity, game: &mut Game) {
         let ap = self.fighter.map_or(0, |f| f.power);
         let ad = other.fighter.map_or(0, |f| f.defense);
         let damage = ap - ad;
 
         if damage > 0 {
-            println!("{} attacks {} for {} hp", self.name, other.name, damage);
-            other.take_damage(damage);
+            game.state.messages.add(
+                format!("{} attacks {} for {} hp", self.name, other.name, damage),
+                colors::WHITE,
+            );
+            other.take_damage(damage, game);
         } else {
-            println!("{} attacks {} but has no effect", self.name, other.name);
+            game.state.messages.add(
+                format!("{} attacks {} but has no effect", self.name, other.name),
+                colors::WHITE,
+            );
         }
     }
 

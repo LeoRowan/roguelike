@@ -1,10 +1,11 @@
-use tcod::{self, console::*, map::Map as FovMap};
+use tcod::{self, colors, console::*, map::Map as FovMap};
 pub mod components;
 pub mod constants;
 pub mod entity;
 pub mod graphics;
 pub mod input;
 pub mod map;
+pub mod messages;
 pub mod state;
 pub mod systems;
 
@@ -28,7 +29,7 @@ impl Game {
             .title("Roguelike/Libtcod Tutorial")
             .init();
 
-        let mut tcod = Tcod {
+        let tcod = Tcod {
             root,
             con: Offscreen::new(MAP_WIDTH as i32, MAP_HEIGHT as i32),
             hud: Offscreen::new(MAP_WIDTH as i32, HUD_HEIGHT as i32),
@@ -36,39 +37,45 @@ impl Game {
         };
 
         tcod::system::set_fps(LIMIT_FPS as i32);
-        for x in 0..MAP_WIDTH as i32 {
-            for y in 0..MAP_HEIGHT as i32 {
-                tcod.fov.set(
-                    x,
-                    y,
-                    !state.map.is_blocked_sight_tile(Point { x, y }),
-                    !state.map.is_blocked_tile(Point { x, y }, &state.entities),
-                );
-            }
-        }
 
         Game { tcod, state }
     }
 
-    pub fn start(mut self) {
+    pub fn start(mut self, mut entities: Vec<Entity>) {
+        self.state.messages.add(
+            "Welcome adventurer! Prepare to perish in the Tombs of the Lost Kings.",
+            colors::RED,
+        );
+
+        for x in 0..MAP_WIDTH as i32 {
+            for y in 0..MAP_HEIGHT as i32 {
+                self.tcod.fov.set(
+                    x,
+                    y,
+                    !self.state.map.is_blocked_sight_tile(Point { x, y }),
+                    !self.state.map.is_blocked_tile(Point { x, y }, &entities),
+                );
+            }
+        }
+
         let mut previous_player_transform = Point::new(-1, -1);
         while !self.tcod.root.window_closed() {
             self.tcod.con.clear();
 
-            let fov_recompute = previous_player_transform != self.state.entities[PLAYER].position;
-            graphics::render_all(&mut self, fov_recompute);
+            let fov_recompute = previous_player_transform != entities[PLAYER].position;
+            graphics::render_all(&mut self, fov_recompute, &entities);
             self.tcod.root.flush();
 
-            previous_player_transform = self.state.entities[PLAYER].position;
-            let player_action = input::handle_keys(&mut self);
+            previous_player_transform = entities[PLAYER].position;
+            let player_action = input::handle_keys(&mut self, &mut entities);
             if player_action == PlayerAction::Exit {
                 break;
             }
 
-            if self.state.entities[PLAYER].is_alive && player_action == PlayerAction::TookTurn {
-                for id in 1..self.state.entities.len() {
-                    if self.state.entities[id].ai.is_some() {
-                        systems::ai_take_turn(id, &mut self);
+            if entities[PLAYER].is_alive && player_action == PlayerAction::TookTurn {
+                for id in 1..entities.len() {
+                    if entities[id].ai.is_some() {
+                        systems::ai_take_turn(id, &mut self, &mut entities);
                     }
                 }
             }

@@ -1,4 +1,4 @@
-use super::entity::Entity;
+use super::{entity::Entity, Game};
 use tcod::colors;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -34,24 +34,26 @@ pub enum DeathCallback {
 }
 
 impl DeathCallback {
-    pub fn callback(self, entity: &mut Entity) {
+    pub fn callback(self, entity: &mut Entity, game: &mut Game) {
         use DeathCallback::*;
 
-        let callback: fn(&mut Entity) = match self {
+        let callback: fn(&mut Entity, &mut Game) = match self {
             Player => player_death,
             Monster => monster_death,
         };
-        callback(entity);
+        callback(entity, game);
 
-        fn player_death(player: &mut Entity) {
-            println!("You died!");
+        fn player_death(player: &mut Entity, game: &mut Game) {
+            game.state.messages.add("You died!", colors::RED);
 
             player.char = '%';
             player.color = colors::DARK_RED;
         }
 
-        fn monster_death(monster: &mut Entity) {
-            println!("{} is dead!", monster.name);
+        fn monster_death(monster: &mut Entity, game: &mut Game) {
+            game.state
+                .messages
+                .add(format!("{} is dead!", monster.name), colors::ORANGE);
 
             monster.char = '%';
             monster.color = colors::DARK_RED;
